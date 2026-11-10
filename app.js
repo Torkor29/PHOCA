@@ -82,7 +82,7 @@ function openView(n){track.innerHTML='';list.forEach(it=>{const d=document.creat
     if(it.img&&it.img.src){const p=new Image();p.src=it.img.src;d.append(p)}it.slide=d;track.append(d)});
   view.classList.remove('hide','ui-off');view.style.background='#000';
   track.scrollLeft=n*track.clientWidth;setIdx(n)}
-function closeView(){view.classList.add('hide');track.querySelectorAll('video').forEach(v=>v.pause());track.innerHTML='';
+function closeView(){Z={s:1,x:0,y:0};track.style.overflowX='auto';view.classList.add('hide');track.querySelectorAll('video').forEach(v=>v.pause());track.innerHTML='';
   full.forEach(u=>URL.revokeObjectURL(u));full.clear()}
 $('close').onclick=closeView;
 async function loadFull(n){const it=list[n];if(!it||full.has(it.id))return;full.set(it.id,'');
@@ -91,23 +91,47 @@ async function loadFull(n){const it=list[n];if(!it||full.has(it.id))return;full.
   let el;if(isVid(r.type)){el=document.createElement('video');el.controls=true;el.playsInline=true;el.preload='metadata';if(it.img)el.poster=it.img.src}
   else{el=new Image();el.decoding='async'}
   el.src=u;const swap=()=>{it.slide.replaceChildren(el)};isVid(r.type)?swap():(el.decode?el.decode().then(swap,swap):swap())}
-function setIdx(n){idx=n;$('count').textContent=(n+1)+' / '+list.length;
+var setIdx=function(n){idx=n;$('count').textContent=(n+1)+' / '+list.length;
   for(const k of [n,n+1,n-1])loadFull(k);
   for(const [id,u] of full){const j=list.findIndex(x=>x.id===id);if(Math.abs(j-n)>2){if(u)URL.revokeObjectURL(u);full.delete(id);
     const it=list[j];if(it&&it.slide&&it.img){const p=new Image();p.src=it.img.src;it.slide.replaceChildren(p)}}}
-  track.querySelectorAll('video').forEach((v,i)=>{if(v.parentNode!==list[n].slide)v.pause()})}
+  track.querySelectorAll('video').forEach((v,i)=>{if(v.parentNode!==list[n].slide)v.pause()})};
 let st;track.addEventListener('scroll',()=>{clearTimeout(st);st=setTimeout(()=>{const n=Math.round(track.scrollLeft/track.clientWidth);if(n!==idx)setIdx(n)},60)},{passive:true});
 window.addEventListener('resize',()=>{if(!view.classList.contains('hide'))track.scrollLeft=idx*track.clientWidth});
-// glisser vers le bas pour fermer + toucher pour masquer l'interface
-let y0=null,x0=0,dy=0,vert=false,moved=false;
-view.addEventListener('touchstart',e=>{if(e.touches.length>1){y0=null;return}y0=e.touches[0].clientY;x0=e.touches[0].clientX;dy=0;vert=false;moved=false},{passive:true});
-view.addEventListener('touchmove',e=>{if(y0===null)return;const t=e.touches[0],ddy=t.clientY-y0,ddx=t.clientX-x0;
+// ---- Gestes : zoom à deux doigts, double-tap, déplacement zoomé, glisser vers le bas pour fermer, toucher = masquer l'UI ----
+let Z={s:1,x:0,y:0},pinch=null,pan=null,y0=null,x0=0,dy=0,vert=false,moved=false,lastTap=0,tapT;
+const curEl=()=>{const it=list[idx];const el=it&&it.slide.firstChild;return el&&el.tagName==='IMG'?el:null};
+function applyZ(el,anim){if(!el)return;el.style.transition=anim?'transform .25s':'none';el.style.transform=`translate(${Z.x}px,${Z.y}px) scale(${Z.s})`;
+  track.style.overflowX=Z.s>1.01?'hidden':'auto'}
+function clampZ(el){const r=el.getBoundingClientRect(),w=r.width/Z.s,h=r.height/Z.s,mx=Math.max(0,(w*Z.s-innerWidth)/2),my=Math.max(0,(h*Z.s-innerHeight)/2);
+  Z.x=Math.max(-mx,Math.min(mx,Z.x));Z.y=Math.max(-my,Math.min(my,Z.y))}
+function resetZ(anim){const el=curEl();Z={s:1,x:0,y:0};if(el)applyZ(el,anim);track.style.overflowX='auto'}
+const _setIdx=setIdx;setIdx=function(n){if(n!==idx){track.querySelectorAll('.slide img').forEach(i=>{i.style.transform='';i.style.transition=''});Z={s:1,x:0,y:0};track.style.overflowX='auto'}_setIdx(n)};
+const dist=t=>Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY),mid=t=>({x:(t[0].clientX+t[1].clientX)/2,y:(t[0].clientY+t[1].clientY)/2});
+view.addEventListener('touchstart',e=>{const t=e.touches,el=curEl();
+  if(t.length===2&&el){pinch={d:dist(t),s:Z.s,x:Z.x,y:Z.y,m:mid(t)};pan=null;y0=null;moved=true;return}
+  if(t.length>1){y0=null;return}
+  if(Z.s>1.01){pan={x:t[0].clientX-Z.x,y:t[0].clientY-Z.y};y0=null;moved=false;x0=t[0].clientX;return}
+  y0=t[0].clientY;x0=t[0].clientX;dy=0;vert=false;moved=false},{passive:false});
+view.addEventListener('touchmove',e=>{const t=e.touches,el=curEl();
+  if(pinch&&t.length===2&&el){e.preventDefault();const m=mid(t),cx=innerWidth/2,cy=innerHeight/2;
+    const s=Math.max(.8,Math.min(6,pinch.s*dist(t)/pinch.d)),k=s/pinch.s;
+    Z.s=s;Z.x=(pinch.m.x-cx)-(pinch.m.x-cx-pinch.x)*k+(m.x-pinch.m.x);Z.y=(pinch.m.y-cy)-(pinch.m.y-cy-pinch.y)*k+(m.y-pinch.m.y);applyZ(el);return}
+  if(pan&&el){e.preventDefault();Z.x=t[0].clientX-pan.x;Z.y=t[0].clientY-pan.y;if(Math.abs(t[0].clientX-x0)>6)moved=true;applyZ(el);return}
+  if(y0===null)return;const ddy=t[0].clientY-y0,ddx=t[0].clientX-x0;
   if(!moved&&Math.hypot(ddx,ddy)>8){moved=true;vert=Math.abs(ddy)>Math.abs(ddx)&&ddy>0&&!(e.target.closest&&e.target.closest('video'))}
-  if(vert){dy=Math.max(0,ddy);const el=list[idx].slide.firstChild;if(el){el.style.transition='none';el.style.transform=`translateY(${dy}px) scale(${1-dy/1500})`}
-    view.style.background=`rgba(0,0,0,${Math.max(.2,1-dy/400)})`}},{passive:true});
-view.addEventListener('touchend',e=>{if(y0===null)return;const el=list[idx]&&list[idx].slide.firstChild;
-  if(vert){if(dy>110)closeView();else if(el){el.style.transition='';el.style.transform='';view.style.background='#000'}}
-  else if(!moved&&!e.target.closest('button')&&!e.target.closest('video'))view.classList.toggle('ui-off');y0=null});
+  if(vert){e.preventDefault();dy=Math.max(0,ddy);const s=list[idx].slide.firstChild;if(s){s.style.transition='none';s.style.transform=`translateY(${dy}px) scale(${1-dy/1500})`}
+    view.style.background=`rgba(0,0,0,${Math.max(.2,1-dy/400)})`}},{passive:false});
+view.addEventListener('touchend',e=>{const el=curEl();
+  if(pinch){if(e.touches.length<2){pinch=null;if(Z.s<1.05)resetZ(true);else{clampZ(el);applyZ(el,true)}
+      if(e.touches.length===1&&Z.s>1.01)pan={x:e.touches[0].clientX-Z.x,y:e.touches[0].clientY-Z.y}}return}
+  if(pan){pan=null;if(el){clampZ(el);applyZ(el,true)}}
+  else if(y0!==null&&vert){const s=list[idx]&&list[idx].slide.firstChild;if(dy>110)closeView();else if(s){s.style.transition='';s.style.transform='';view.style.background='#000'}y0=null;return}
+  y0=null;if(moved||e.target.closest('button')||e.target.closest('video'))return;
+  const now=Date.now();
+  if(now-lastTap<300&&el){clearTimeout(tapT);lastTap=0;
+    if(Z.s>1.01)resetZ(true);else{const p=e.changedTouches[0],cx=innerWidth/2,cy=innerHeight/2;Z.s=2.5;Z.x=-(p.clientX-cx)*1.5;Z.y=-(p.clientY-cy)*1.5;clampZ(el);applyZ(el,true)}return}
+  lastTap=now;tapT=setTimeout(()=>view.classList.toggle('ui-off'),300)});
 view.addEventListener('click',e=>{if(!('ontouchstart'in window)&&!e.target.closest('button')&&!e.target.closest('video'))view.classList.toggle('ui-off')});
 document.addEventListener('keydown',e=>{if(view.classList.contains('hide'))return;
   if(e.key==='Escape')closeView();if(e.key==='ArrowRight'||e.key==='ArrowLeft'){const n=Math.max(0,Math.min(list.length-1,idx+(e.key==='ArrowRight'?1:-1)));track.scrollTo({left:n*track.clientWidth,behavior:'smooth'})}});
