@@ -3,42 +3,72 @@
 <title>WikeGuard</title><link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="WikeGuard">
-<meta name="theme-color" content="#1f4e79">
+<meta name="theme-color" content="#0b1020"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--b:#1f4e79;--bg:#f3f5f8;--t:#222;--m:#778}
+:root{--bg:#0b1020;--card:#141a2e;--line:#232b45;--t:#e8ecf6;--m:#8a93ad;--acc:#4f8cff;--ok:#3ddc97}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;font:15px -apple-system,system-ui,sans-serif;background:var(--bg);color:var(--t)}
-header{background:var(--b);color:#fff;padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;display:flex;align-items:center;gap:10px}
-header b{font-size:18px}.card{background:#fff;margin:12px 16px;padding:14px;border-radius:10px;box-shadow:0 1px 3px #0001}
-.row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee}.row:last-child{border:0}
-.ok{color:#2a8a3e}small{color:var(--m)}input,button{font:inherit;padding:10px;border-radius:8px;border:1px solid #ccd;width:100%}
-button{background:var(--b);color:#fff;border:0;margin-top:8px}.hide{display:none!important}
-#vault{position:fixed;inset:0;background:#111;color:#eee;overflow:auto;padding-bottom:40px}
-#vault header{background:#000}#grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
-#grid img,#grid video{width:100%;aspect-ratio:1;object-fit:cover;display:block}
-#view{position:fixed;inset:0;background:#000;display:flex;flex-direction:column}
-#view img{flex:1;min-height:0;object-fit:contain;width:100%}#view .bar{display:flex;gap:8px;padding:10px 16px calc(env(safe-area-inset-bottom) + 10px)}
-.bar button{margin:0}.danger{background:#a33}.ghost{background:#333}
+html,body{margin:0;background:var(--bg);color:var(--t);font:15px/1.4 Inter,-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:460px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 24px)}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:22px}
+.top img{width:34px;height:34px;border-radius:9px}.top b{font-size:18px;letter-spacing:-.2px}
+.top .pill{margin-left:auto;font-size:12px;color:var(--ok);background:#3ddc9718;padding:5px 10px;border-radius:99px}
+.hero{text-align:center;padding:10px 0 24px}
+.ring{width:190px;height:190px;margin:0 auto 16px;border-radius:50%;display:grid;place-items:center;
+ background:conic-gradient(var(--ok) 0 97%,var(--line) 97% 100%);position:relative}
+.ring::before{content:"";position:absolute;inset:12px;border-radius:50%;background:var(--bg)}
+.ring div{position:relative}.ring span{display:block;font-size:46px;font-weight:700;letter-spacing:-1px}.ring small{color:var(--m);font-size:13px}
+.hero h1{font-size:20px;margin:0 0 4px;font-weight:600}.hero p{margin:0;color:var(--m);font-size:14px}
+.grid4{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.tile small{color:var(--m);font-size:12px}.tile div{font-size:20px;font-weight:600;margin-top:4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+.card h2{font-size:15px;margin:0 0 4px;font-weight:600}.card p{margin:0 0 12px;color:var(--m);font-size:13px}
+.row{display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line);font-size:14px}.row span:last-child{color:var(--m)}
+.ok{color:var(--ok)!important}small{color:var(--m)}
+input{font:inherit;width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);background:#0e1426;color:var(--t);letter-spacing:2px;outline:none}
+input:focus{border-color:var(--acc)}
+button{font:inherit;font-weight:600;width:100%;padding:13px;border-radius:12px;border:0;background:var(--acc);color:#fff;margin-top:10px;cursor:pointer}
+#msg{display:block;margin-top:8px;color:#ff6b6b;min-height:1em;font-size:13px}
+.hide{display:none!important}
+#vault{position:fixed;inset:0;background:#000;overflow:auto}
+.vh{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;background:#000c;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.vh b{font-size:22px}.vh button{width:auto;margin:0;padding:8px 14px;border-radius:99px;background:#222;font-weight:500}
+.vh #add{background:var(--acc)}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:2px}
+#grid img,#grid video{width:100%;aspect-ratio:1;object-fit:cover;display:block;cursor:pointer}
+#info{padding:40px 16px;text-align:center;color:#777}
+#view{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;z-index:5}
+#view img,#view video{flex:1;min-height:0;object-fit:contain;width:100%}
+.bar{display:flex;gap:10px;padding:10px 16px calc(env(safe-area-inset-bottom) + 10px);max-width:460px;margin:0 auto;width:100%}
+.bar button{margin:0}.danger{background:#e5484d}.ghost{background:#222}
+#pick{z-index:6}
+.sheet{background:#1a1a1a;width:100%;max-width:460px;margin:0 auto;padding:16px 16px calc(env(safe-area-inset-bottom) + 16px);border-radius:20px 20px 0 0}
+.sheet label{display:block}
 </style></head><body>
-<div id="cover">
-<header><b id="logo">WikeGuard</b><small style="color:#cde;margin-left:auto">v2.4.1</small></header>
-<div class="card"><b>Statut du réseau</b>
-<div class="row"><span>Pare-feu</span><span class="ok">Actif</span></div>
-<div class="row"><span>Menaces bloquées (24h)</span><span>0</span></div>
-<div class="row"><span>Dernière analyse</span><span id="last">—</span></div>
-<div class="row"><span>Définitions</span><span>À jour</span></div></div>
-<div class="card"><b>Activation de la licence</b><br><small>Saisissez votre clé produit pour débloquer les fonctions avancées.</small>
-<input id="key" inputmode="numeric" autocomplete="off" placeholder="XXXX-XXXX"><button id="act">Activer</button>
-<small id="msg"></small></div>
-<div class="card"><small>WikeGuard Network Diagnostics. Aucune donnée n'est collectée.</small></div>
+<div id="cover" class="wrap">
+<div class="top"><img src="icons/icon-192.png" alt=""><b id="logo">WikeGuard</b><span class="pill">● Protégé</span></div>
+<div class="hero"><div class="ring"><div><span>97</span><small>Score sécurité</small></div></div>
+<h1>Votre appareil est protégé</h1><p>Dernière analyse : <span id="last">—</span></p></div>
+<div class="grid4">
+<div class="tile"><small>Menaces bloquées</small><div>0</div></div>
+<div class="tile"><small>Réseaux analysés</small><div>3</div></div>
+<div class="tile"><small>Pare-feu</small><div class="ok">Actif</div></div>
+<div class="tile"><small>Définitions</small><div>À jour</div></div></div>
+<div class="card"><h2>Activation Premium</h2><p>Saisissez votre clé produit pour activer la protection avancée.</p>
+<input id="key" type="password" inputmode="numeric" autocomplete="off" placeholder="Clé produit"><button id="act">Activer</button><small id="msg"></small></div>
+<div class="card" style="padding-bottom:6px"><h2>Détails</h2>
+<div class="row"><span>VPN</span><span>Désactivé</span></div>
+<div class="row"><span>DNS sécurisé</span><span class="ok">Actif</span></div>
+<div class="row"><span>Version</span><span>2.4.1</span></div></div>
 </div>
 <div id="vault" class="hide">
-<header><b>Coffre</b><span style="margin-left:auto;display:flex;gap:8px">
-<button id="add" class="ghost" style="width:auto;margin:0">＋</button>
-<button id="lock" class="ghost" style="width:auto;margin:0">Verrouiller</button></span></header>
-<p id="info" style="padding:0 16px;color:#999"></p><div id="grid"></div></div>
+<div class="vh"><b>Coffre</b><span style="margin-left:auto;display:flex;gap:8px">
+<button id="add">＋ Ajouter</button>
+<button id="lock">Verrouiller</button></span></div>
+<p id="info"></p><div id="grid"></div></div>
 <div id="pick" class="hide" style="position:fixed;inset:0;background:#000a;display:flex;align-items:flex-end">
-<div style="background:#222;width:100%;padding:16px 16px calc(env(safe-area-inset-bottom) + 16px);border-radius:14px 14px 0 0">
+<div class="sheet">
 <label><button class="ghost" style="pointer-events:none">Photothèque (photos & vidéos)</button><input id="fLib" type="file" accept="image/*,video/*" multiple class="hide"></label>
 <label><button class="ghost" style="pointer-events:none">Fichiers</button><input id="fFiles" type="file" accept="image/*,video/*,.heic,.mov,.mp4" multiple class="hide"></label>
 <button id="pickX">Annuler</button></div></div>
