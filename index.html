@@ -15,7 +15,7 @@ header b{font-size:18px}.card{background:#fff;margin:12px 16px;padding:14px;bord
 button{background:var(--b);color:#fff;border:0;margin-top:8px}.hide{display:none}
 #vault{position:fixed;inset:0;background:#111;color:#eee;overflow:auto;padding-bottom:40px}
 #vault header{background:#000}#grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
-#grid img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+#grid img,#grid video{width:100%;aspect-ratio:1;object-fit:cover;display:block}
 #view{position:fixed;inset:0;background:#000;display:flex;flex-direction:column}
 #view img{flex:1;min-height:0;object-fit:contain;width:100%}#view .bar{display:flex;gap:8px;padding:10px 16px calc(env(safe-area-inset-bottom) + 10px)}
 .bar button{margin:0}.danger{background:#a33}.ghost{background:#333}
@@ -34,8 +34,13 @@ button{background:var(--b);color:#fff;border:0;margin-top:8px}.hide{display:none
 </div>
 <div id="vault" class="hide">
 <header><b>Coffre</b><span style="margin-left:auto;display:flex;gap:8px">
-<label class="ghost" style="padding:8px 12px;border-radius:8px;background:#333">＋<input id="file" type="file" accept="image/*" multiple class="hide"></label>
+<button id="add" class="ghost" style="width:auto;margin:0">＋</button>
 <button id="lock" class="ghost" style="width:auto;margin:0">Verrouiller</button></span></header>
 <p id="info" style="padding:0 16px;color:#999"></p><div id="grid"></div></div>
-<div id="view" class="hide"><img id="big"><div class="bar"><button class="ghost" id="close">Fermer</button><button class="danger" id="del">Supprimer</button></div></div>
+<div id="pick" class="hide" style="position:fixed;inset:0;background:#000a;display:flex;align-items:flex-end">
+<div style="background:#222;width:100%;padding:16px 16px calc(env(safe-area-inset-bottom) + 16px);border-radius:14px 14px 0 0">
+<label><button class="ghost" style="pointer-events:none">Photothèque (photos & vidéos)</button><input id="fLib" type="file" accept="image/*,video/*" multiple class="hide"></label>
+<label><button class="ghost" style="pointer-events:none">Fichiers</button><input id="fFiles" type="file" accept="image/*,video/*,.heic,.mov,.mp4" multiple class="hide"></label>
+<button id="pickX">Annuler</button></div></div>
+<div id="view" class="hide"><img id="big"><video id="bigv" controls playsinline class="hide" style="flex:1;min-height:0;width:100%"></video><div class="bar"><button class="ghost" id="close">Fermer</button><button class="danger" id="del">Supprimer</button></div></div>
 <script src="app.js"></script></body></html>

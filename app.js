@@ -36,17 +36,22 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden&&key)lock()
 async function render(){
   urls.forEach(URL.revokeObjectURL);urls=[];const g=$('grid');g.innerHTML='';
   const items=await tx('items','readonly',s=>s.getAll());
-  $('info').textContent=items.length?'':'Vide. Touchez ＋ pour importer des photos.';
+  $('info').textContent=items.length?'':'Vide. Touchez ＋ pour importer photos et vidéos.';
   for(const it of items.sort((a,b)=>b.id-a.id)){
     const u=URL.createObjectURL(new Blob([await open_(it)],{type:it.type}));urls.push(u);
-    const i=new Image();i.src=u;i.onclick=()=>{cur=it.id;$('big').src=u;$('view').classList.remove('hide')};g.append(i)}
+    const v=(it.type||'').startsWith('video');const i=v?document.createElement('video'):new Image();
+    if(v){i.muted=true;i.playsInline=true;i.preload='metadata';i.src=u+'#t=0.1'}else i.src=u;
+    i.onclick=()=>{cur=it.id;$('big').classList.toggle('hide',v);$('bigv').classList.toggle('hide',!v);
+      if(v)$('bigv').src=u;else $('big').src=u;$('view').classList.remove('hide')};g.append(i)}
 }
-$('file').onchange=async e=>{
+$('add').onclick=()=>$('pick').classList.remove('hide');
+$('pickX').onclick=()=>$('pick').classList.add('hide');
+$('fLib').onchange=$('fFiles').onchange=async e=>{$('pick').classList.add('hide');
   const fs=[...e.target.files];e.target.value='';$('info').textContent='Import…';
   for(const f of fs){const s=await seal(await f.arrayBuffer());await tx('items','readwrite',st=>st.put({id:Date.now()+Math.random(),type:f.type,...s}))}
   await render();
-  if(fs.length)alert(fs.length+' photo(s) importée(s) et chiffrée(s).\n\nPour les retirer du téléphone : ouvre Photos, supprime-les, puis vide l\'album « Supprimés récemment ».')};
-$('close').onclick=()=>$('view').classList.add('hide');
+  if(fs.length)alert(fs.length+' élément(s) importé(s) et chiffré(s).\n\nPour les retirer du téléphone : ouvre Photos, supprime-les, puis vide l\'album « Supprimés récemment ».')};
+$('close').onclick=()=>{$('bigv').pause();$('view').classList.add('hide')};
 $('del').onclick=async()=>{if(!confirm('Supprimer cette photo ?'))return;await tx('items','readwrite',s=>s.delete(cur));$('view').classList.add('hide');render()};
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
