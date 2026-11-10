@@ -197,7 +197,8 @@ $('fRes').onchange=async e=>{
       prog('Décodage '+(n+1)+' / '+head.items.length,(n+.5)/head.items.length);
       const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(it.iv)},k,data);const s2=await seal(plain);
       await tx('items','readwrite',st=>st.put({id:it.id,type:it.type,...s2}));await storeThumb(it.id,new Blob([plain],{type:it.type}),isVid(it.type));n++}
-    await render();toast(n+' élément'+(n>1?'s':'')+' récupéré'+(n>1?'s':''),3000);
+    hideToast();await render();const tot=head.items.length,dup=tot-n;
+    await ask({title:'Fichier valide ✓',msg:tot+' élément'+(tot>1?'s':'')+' dans le fichier.\n'+(n?n+' récupéré'+(n>1?'s':'')+'. ':'')+(dup?dup+' déjà présent'+(dup>1?'s':'')+' dans le coffre (non dupliqué'+(dup>1?'s':'')+').':''),ok:'OK',cancel:false});
   }catch(err){toast('Fichier illisible')}};
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
