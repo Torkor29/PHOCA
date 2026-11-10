@@ -45,10 +45,12 @@ async function render(){
       if(v)$('bigv').src=u;else $('big').src=u;$('view').classList.remove('hide')};g.append(i)}
 }
 $('add').onclick=()=>$('pick').classList.remove('hide');
+$('bLib').onclick=()=>$('fLib').click();
+$('bFiles').onclick=()=>$('fFiles').click();
 $('pickX').onclick=()=>$('pick').classList.add('hide');
 $('fLib').onchange=$('fFiles').onchange=async e=>{$('pick').classList.add('hide');
-  const fs=[...e.target.files];e.target.value='';$('info').textContent='Import…';
-  for(const f of fs){const s=await seal(await f.arrayBuffer());await tx('items','readwrite',st=>st.put({id:Date.now()+Math.random(),type:f.type,...s}))}
+  const fs=[...e.target.files].filter(f=>/^(image|video)\//.test(f.type)||/\.(heic|heif|jpe?g|png|gif|webp|mov|mp4|m4v)$/i.test(f.name));e.target.value='';$('info').textContent='Import…';
+  for(const f of fs){const s=await seal(await f.arrayBuffer());await tx('items','readwrite',st=>st.put({id:Date.now()+Math.random(),type:f.type||(/\.(mov|mp4|m4v)$/i.test(f.name)?'video/mp4':'image/jpeg'),...s}))}
   await render();
   if(fs.length)alert(fs.length+' élément(s) importé(s) et chiffré(s).\n\nPour les retirer du téléphone : ouvre Photos, supprime-les, puis vide l\'album « Supprimés récemment ».')};
 $('close').onclick=()=>{$('bigv').pause();$('view').classList.add('hide')};
