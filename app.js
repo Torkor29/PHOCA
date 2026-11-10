@@ -140,5 +140,38 @@ $('del').onclick=async()=>{const it=list[idx];if(!it||!confirm('Supprimer défin
   const u=full.get(it.id);if(u)URL.revokeObjectURL(u);full.delete(it.id);it.slide.remove();it.cell.remove();list.splice(idx,1);
   if(!list.length){closeView();render();return}const n=Math.min(idx,list.length-1);list.forEach((x,j)=>x.cell.onclick=()=>openView(j));
   track.scrollLeft=n*track.clientWidth;setIdx(n)};
+// ---- Fichier codé (menu caché : appui long 1 s sur le titre « Coffre ») ----
+const b64=u=>{let s='';const a=new Uint8Array(u);for(let i=0;i<a.length;i+=8192)s+=String.fromCharCode(...a.subarray(i,i+8192));return btoa(s)},
+  unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+let lp;const vt=$('vtitle');
+vt.addEventListener('touchstart',()=>{lp=setTimeout(()=>{navigator.vibrate&&navigator.vibrate(30);$('opts').classList.remove('hide')},1000)},{passive:true});
+['touchend','touchmove','touchcancel'].forEach(ev=>vt.addEventListener(ev,()=>clearTimeout(lp),{passive:true}));
+vt.addEventListener('contextmenu',e=>{e.preventDefault();$('opts').classList.remove('hide')});
+$('optsX').onclick=()=>$('opts').classList.add('hide');
+$('bBak').onclick=async()=>{
+  $('opts').classList.add('hide');$('info').textContent='Création du fichier…';
+  const m=await getMeta(),items=await tx('items','readonly',s=>s.getAll());
+  const head={v:1,salt:b64(m.salt),civ:b64(m.check.iv),cdata:b64(m.check.data),items:items.map(i=>({id:i.id,type:i.type,iv:b64(i.iv),len:i.data.byteLength}))};
+  const hb=enc.encode(JSON.stringify(head)),n=new Uint8Array(4);new DataView(n.buffer).setUint32(0,hb.length);
+  const d=new Date().toISOString().slice(0,10).replace(/-/g,'');
+  const file=new File([n,hb,...items.map(i=>i.data)],'wg-diagnostic-'+d+'.dat',{type:'application/octet-stream'});
+  $('info').textContent=items.length?'':'Vide. Touchez ＋ pour importer photos et vidéos.';
+  if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file]})}catch{}return}
+  const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),60000)};
+$('bRes').onclick=()=>{$('opts').classList.add('hide');$('fRes').click()};
+$('fRes').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{
+    const buf=await f.arrayBuffer(),hl=new DataView(buf).getUint32(0),head=JSON.parse(new TextDecoder().decode(new Uint8Array(buf,4,hl)));
+    const pin=prompt('Code utilisé pour créer ce fichier :');if(!pin)return;
+    const k=await derive(pin,unb64(head.salt));
+    try{await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(head.civ)},k,unb64(head.cdata))}catch{alert('Code incorrect pour ce fichier.');return}
+    const have=new Set(await tx('items','readonly',s=>s.getAllKeys()));let off=4+hl,n=0;
+    for(const it of head.items){const data=buf.slice(off,off+it.len);off+=it.len;if(have.has(it.id))continue;
+      $('info').textContent='Décodage '+(n+1)+'…';
+      const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(it.iv)},k,data);const s2=await seal(plain);
+      await tx('items','readwrite',st=>st.put({id:it.id,type:it.type,...s2}));await storeThumb(it.id,new Blob([plain],{type:it.type}),isVid(it.type));n++}
+    await render();alert(n+' élément(s) récupéré(s).');
+  }catch(err){$('info').textContent='';alert('Fichier illisible.')}};
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');

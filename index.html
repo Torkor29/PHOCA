@@ -71,7 +71,7 @@ button{font:inherit;font-weight:600;width:100%;padding:13px;border-radius:12px;b
 <div class="row"><span>Version</span><span>2.4.1</span></div></div>
 </div>
 <div id="vault" class="hide">
-<div class="vh"><b>Coffre</b><span style="margin-left:auto;display:flex;gap:8px">
+<div class="vh"><b id="vtitle" style="user-select:none;-webkit-user-select:none;-webkit-touch-callout:none">Coffre</b><span style="margin-left:auto;display:flex;gap:8px">
 <button id="add">＋ Ajouter</button>
 <button id="lock">Verrouiller</button></span></div>
 <p id="info"></p><div id="grid"></div></div>
@@ -81,6 +81,12 @@ button{font:inherit;font-weight:600;width:100%;padding:13px;border-radius:12px;b
 <button type="button" class="ghost" id="bFiles">Fichiers</button>
 <button type="button" id="pickX">Annuler</button></div></div>
 <input id="fLib" type="file" accept="image/*,video/*" multiple class="vh-in"><input id="fFiles" type="file" multiple class="vh-in">
+<div id="opts" class="hide" style="position:fixed;inset:0;background:#000a;display:flex;align-items:flex-end;z-index:6">
+<div class="sheet"><p style="margin:0 0 6px;color:#999;font-size:13px">Fichier codé : enregistre-le dans Fichiers ou iCloud Drive. Il ne se décode qu'ici, avec ton code.</p>
+<button type="button" class="ghost" id="bBak">Créer le fichier codé</button>
+<button type="button" class="ghost" id="bRes">Décoder un fichier</button>
+<button type="button" id="optsX">Fermer</button></div></div>
+<input id="fRes" type="file" class="vh-in">
 <div id="view" class="hide">
 <div id="track"></div>
 <div class="vtop"><button id="close" aria-label="Fermer">✕</button><span id="count"></span><button id="del" aria-label="Supprimer">🗑</button></div>
