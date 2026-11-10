@@ -44,7 +44,8 @@ async function render(){
 $('file').onchange=async e=>{
   const fs=[...e.target.files];e.target.value='';$('info').textContent='Import…';
   for(const f of fs){const s=await seal(await f.arrayBuffer());await tx('items','readwrite',st=>st.put({id:Date.now()+Math.random(),type:f.type,...s}))}
-  render()};
+  await render();
+  if(fs.length)alert(fs.length+' photo(s) importée(s) et chiffrée(s).\n\nPour les retirer du téléphone : ouvre Photos, supprime-les, puis vide l\'album « Supprimés récemment ».')};
 $('close').onclick=()=>$('view').classList.add('hide');
 $('del').onclick=async()=>{if(!confirm('Supprimer cette photo ?'))return;await tx('items','readwrite',s=>s.delete(cur));$('view').classList.add('hide');render()};
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
