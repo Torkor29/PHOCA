@@ -1,0 +1,41 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>WikeGuard</title><link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="WikeGuard">
+<meta name="theme-color" content="#1f4e79">
+<style>
+:root{--b:#1f4e79;--bg:#f3f5f8;--t:#222;--m:#778}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font:15px -apple-system,system-ui,sans-serif;background:var(--bg);color:var(--t)}
+header{background:var(--b);color:#fff;padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;display:flex;align-items:center;gap:10px}
+header b{font-size:18px}.card{background:#fff;margin:12px 16px;padding:14px;border-radius:10px;box-shadow:0 1px 3px #0001}
+.row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee}.row:last-child{border:0}
+.ok{color:#2a8a3e}small{color:var(--m)}input,button{font:inherit;padding:10px;border-radius:8px;border:1px solid #ccd;width:100%}
+button{background:var(--b);color:#fff;border:0;margin-top:8px}.hide{display:none}
+#vault{position:fixed;inset:0;background:#111;color:#eee;overflow:auto;padding-bottom:40px}
+#vault header{background:#000}#grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+#grid img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+#view{position:fixed;inset:0;background:#000;display:flex;flex-direction:column}
+#view img{flex:1;min-height:0;object-fit:contain;width:100%}#view .bar{display:flex;gap:8px;padding:10px 16px calc(env(safe-area-inset-bottom) + 10px)}
+.bar button{margin:0}.danger{background:#a33}.ghost{background:#333}
+</style></head><body>
+<div id="cover">
+<header><b id="logo">WikeGuard</b><small style="color:#cde;margin-left:auto">v2.4.1</small></header>
+<div class="card"><b>Statut du réseau</b>
+<div class="row"><span>Pare-feu</span><span class="ok">Actif</span></div>
+<div class="row"><span>Menaces bloquées (24h)</span><span>0</span></div>
+<div class="row"><span>Dernière analyse</span><span id="last">—</span></div>
+<div class="row"><span>Définitions</span><span>À jour</span></div></div>
+<div class="card"><b>Activation de la licence</b><br><small>Saisissez votre clé produit pour débloquer les fonctions avancées.</small>
+<input id="key" inputmode="numeric" autocomplete="off" placeholder="XXXX-XXXX"><button id="act">Activer</button>
+<small id="msg"></small></div>
+<div class="card"><small>WikeGuard Network Diagnostics. Aucune donnée n'est collectée.</small></div>
+</div>
+<div id="vault" class="hide">
+<header><b>Coffre</b><span style="margin-left:auto;display:flex;gap:8px">
+<label class="ghost" style="padding:8px 12px;border-radius:8px;background:#333">＋<input id="file" type="file" accept="image/*" multiple class="hide"></label>
+<button id="lock" class="ghost" style="width:auto;margin:0">Verrouiller</button></span></header>
+<p id="info" style="padding:0 16px;color:#999"></p><div id="grid"></div></div>
+<div id="view" class="hide"><img id="big"><div class="bar"><button class="ghost" id="close">Fermer</button><button class="danger" id="del">Supprimer</button></div></div>
+<script src="app.js"></script></body></html>
